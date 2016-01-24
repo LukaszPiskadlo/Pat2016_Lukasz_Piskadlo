@@ -34,7 +34,6 @@ public class SplashActivity extends AppCompatActivity {
         if(wasBackPressed) {
             super.onBackPressed();
         }
-
         handler.removeCallbacks(runnable);
         wasBackPressed = true;
     }
