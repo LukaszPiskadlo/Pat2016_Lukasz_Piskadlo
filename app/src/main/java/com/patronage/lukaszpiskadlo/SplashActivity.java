@@ -1,6 +1,7 @@
 package com.patronage.lukaszpiskadlo;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,7 +9,7 @@ import android.os.Bundle;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int TIME = 5000; // how long splash screen will be displayed in ms
+    private static final int SPLASH_DURATION_IN_MS = 5000;
     private Handler handler;
     private Runnable runnable;
     private boolean wasBackPressed;
@@ -23,10 +24,10 @@ public class SplashActivity extends AppCompatActivity {
         runnable = new Runnable() {
             @Override
             public void run() {
-                startMainActivity();
+                startActivity();
             }
         };
-        handler.postDelayed(runnable, TIME);
+        handler.postDelayed(runnable, SPLASH_DURATION_IN_MS);
     }
 
     @Override
@@ -38,8 +39,16 @@ public class SplashActivity extends AppCompatActivity {
         wasBackPressed = true;
     }
 
-    private void startMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
+    private void startActivity() {
+        SharedPreferences settings = getSharedPreferences(getString(R.string.preferences), 0);
+        boolean isLoggedIn = settings.getBoolean(getString(R.string.key_logged_in), false);
+
+        Intent intent;
+        if(isLoggedIn) {
+            intent = new Intent(this, MainActivity.class);
+        } else {
+            intent = new Intent(this, LoginActivity.class);
+        }
         startActivity(intent);
         finish();
     }
