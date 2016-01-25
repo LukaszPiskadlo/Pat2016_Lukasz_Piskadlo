@@ -1,2 +1,2 @@
 # Patronage 2016 - Android
-Zadanie 1
+Zadania 1, 2
