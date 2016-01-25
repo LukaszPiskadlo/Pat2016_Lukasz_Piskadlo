@@ -8,10 +8,15 @@ import android.os.Bundle;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int TIME = 5000; // how long splash screen will be displayed in ms
-    private Handler handler;
-    private Runnable runnable;
+    private static final int SPLASH_DURATION_IN_MS = 5000;
     private boolean wasBackPressed;
+    private final Handler handler = new Handler();
+    private final Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            startMainActivity();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,14 +24,7 @@ public class SplashActivity extends AppCompatActivity {
 
         wasBackPressed = false;
 
-        handler = new Handler();
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                startMainActivity();
-            }
-        };
-        handler.postDelayed(runnable, TIME);
+        handler.postDelayed(runnable, SPLASH_DURATION_IN_MS);
     }
 
     @Override
@@ -36,6 +34,12 @@ public class SplashActivity extends AppCompatActivity {
         }
         handler.removeCallbacks(runnable);
         wasBackPressed = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(runnable);
     }
 
     private void startMainActivity() {
