@@ -137,10 +137,9 @@ public class MainActivity extends AppCompatActivity {
                 if(responseCode == HttpURLConnection.HTTP_OK) {
                     inputStream = connection.getInputStream();
                     return parse(inputStream);
-                } else {
-                    cancel(true);
-                    return null;
                 }
+                cancel(true);
+                return null;
             } finally {
                 if(inputStream != null) {
                     inputStream.close();
