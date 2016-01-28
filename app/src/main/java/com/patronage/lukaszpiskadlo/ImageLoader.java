@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 
 public class ImageLoader {
     private Context context;
@@ -61,7 +62,7 @@ public class ImageLoader {
 
         if (imageLoaderTask != null) {
             String imageUrl = imageLoaderTask.imageUrl;
-            if (imageUrl.isEmpty()) {
+            if (imageUrl.isEmpty() || !imageUrl.equals(url)) {
                 imageLoaderTask.cancel(true);
             } else {
                 return false;
