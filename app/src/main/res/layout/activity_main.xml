@@ -9,11 +9,24 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.patronage.lukaszpiskadlo.MainActivity">
 
-    <Button
+    <GridView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/gridView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:horizontalSpacing="@dimen/image_spacing"
+        android:verticalSpacing="@dimen/image_spacing"
+        android:numColumns="@integer/columns_number" />
+
+    <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/logout_button_text"
-        android:id="@+id/button_logout"
+        android:id="@+id/progressBar"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        android:background="#ffffff" />
+
 </RelativeLayout>
