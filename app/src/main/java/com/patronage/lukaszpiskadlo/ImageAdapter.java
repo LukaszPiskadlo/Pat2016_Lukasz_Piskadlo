@@ -1,55 +1,85 @@
 package com.patronage.lukaszpiskadlo;
 
+import android.app.Activity;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
-public class ImageAdapter extends BaseAdapter{
+import java.util.ArrayList;
+import java.util.List;
+
+public class ImageAdapter extends BaseAdapter {
 
     private Context context;
-    private int height = 0;
-    private int numColumns = 0;
-    private GridView.LayoutParams viewLayoutParams;
+    private List<Item> imageList;
+    private ImageLoader imageLoader;
+    private int gridLayoutId;
 
     public ImageAdapter(Context c) {
         super();
         context = c;
-        viewLayoutParams = new GridView.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        gridLayoutId = R.layout.grid_item;
+        imageList = new ArrayList<>();
+
+        int imageSize = context.getResources().getDimensionPixelSize(R.dimen.image_size);
+        imageLoader = new ImageLoader(context, imageSize);
+        imageLoader.setPlaceholderImage(R.drawable.placeholder);
     }
 
     @Override
     public int getCount() {
-        if(numColumns == 0) {
-            return 0;
-        }
-        return 0;
+        return imageList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return imageList.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        ViewHolder holder;
+        Item item = imageList.get(position);
+
         if(convertView == null) {
-            imageView = new ImageView(context);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setLayoutParams(viewLayoutParams);
+            holder = new ViewHolder();
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            convertView = inflater.inflate(gridLayoutId, parent, false);
+            holder.image = (ImageView) convertView.findViewById(R.id.imageView);
+            holder.title = (TextView) convertView.findViewById(R.id.imageTitle);
+            holder.desc = (TextView) convertView.findViewById(R.id.imageDesc);
+            convertView.setTag(holder);
         } else {
-            imageView = (ImageView) convertView;
+            holder = (ViewHolder) convertView.getTag();
         }
 
-        return imageView;
+        holder.title.setText(item.getTitle());
+        holder.desc.setText(item.getDesc());
+        // load images
+        imageLoader.loadImage(item.getUrl(), holder.image);
+        return convertView;
+    }
+
+    /**
+     * Adds image item to list
+     */
+    public void addImageToList(Item item) {
+        imageList.add(item);
+        notifyDataSetChanged();
+    }
+
+    private static class ViewHolder {
+        ImageView image;
+        TextView title;
+        TextView desc;
     }
 }

@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 
 import org.json.JSONArray;
@@ -21,8 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,20 +31,36 @@ public class MainActivity extends AppCompatActivity {
     final static String FILE_EXTENSION = ".json";
     private int page;
     private boolean isLastPage;
-    private List<Item> imageList;
+    private boolean isPageLoading;
     private ProgressBar progressBar;
+    private ImageAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-        imageList = new ArrayList<>();
         page = 0;
         isLastPage = false;
-        requestJsonData();
+        isPageLoading = false;
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        GridView gridView = (GridView) findViewById(R.id.gridView);
+
+        adapter = new ImageAdapter(MainActivity.this);
+        gridView.setAdapter(adapter);
+        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (!isPageLoading && !isLastPage && totalItemCount == firstVisibleItem + visibleItemCount) {
+                    requestJsonData();
+                }
+            }
+        });
     }
 
     /**
@@ -58,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestJsonData() {
-        if(isOnline() && !isLastPage) {
+        if(isOnline()) {
             new DownloadTask().execute(BASE_SERVER_URL + FILE_NAME + page + FILE_EXTENSION);
             page++;
         }
@@ -85,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             progressBar.setVisibility(View.VISIBLE);
+            isPageLoading = true;
         }
 
         @Override
@@ -105,11 +122,13 @@ public class MainActivity extends AppCompatActivity {
                 jsonToItem(jsonArray);
             }
             progressBar.setVisibility(View.INVISIBLE);
+            isPageLoading = false;
         }
 
         @Override
         protected void onCancelled() {
             super.onCancelled();
+            isPageLoading = false;
             isLastPage = true;
             progressBar.setVisibility(View.INVISIBLE);
         }
@@ -179,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     String desc = jObj.getString("desc");
                     String url = jObj.getString("url");
 
-                    imageList.add(new Item(title, desc, url));
+                    adapter.addImageToList(new Item(title, desc, url));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

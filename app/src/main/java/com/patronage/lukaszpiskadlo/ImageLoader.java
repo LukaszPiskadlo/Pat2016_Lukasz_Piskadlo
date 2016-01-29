@@ -9,12 +9,12 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Objects;
 
 public class ImageLoader {
     private Context context;
@@ -22,10 +22,10 @@ public class ImageLoader {
     private int imageHeight;
     private Bitmap placeholderImage;
 
-    private ImageLoader(Context context, int imageWidth, int imageHeight) {
+    public ImageLoader(Context context, int imageSize) {
         this.context = context;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
+        this.imageWidth = imageSize;
+        this.imageHeight = imageSize;
     }
 
     /**
@@ -132,6 +132,7 @@ public class ImageLoader {
         private Bitmap downloadImage(String url) throws IOException {
             InputStream inputStream = null;
             HttpURLConnection connection = null;
+
             try {
                 // setup connection
                 URL urlObj = new URL(url);
@@ -145,7 +146,8 @@ public class ImageLoader {
                 int responseCode = connection.getResponseCode();
                 if(responseCode == HttpURLConnection.HTTP_OK) {
                     inputStream = connection.getInputStream();
-                    return decodeImage(inputStream);
+                    byte[] byteArray = inputStreamToByteArray(inputStream);
+                    return decodeImage(byteArray);
                 }
                 cancel(true);
                 return null;
@@ -162,15 +164,32 @@ public class ImageLoader {
         /**
          * Decodes image from stream and resize it
          */
-        private Bitmap decodeImage(InputStream inputStream) {
+        private Bitmap decodeImage(byte[] byteArray) {
             // decode to check dimensions
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(inputStream, null, options);
+            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
 
             options.inSampleSize = calculateInSampleSize(options);
-            options.inJustDecodeBounds = true;
-            return BitmapFactory.decodeStream(inputStream, null, options);
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
+        }
+
+        /**
+         * Reads input stream and writes it into byte array
+         * @return byte array from input stream
+         * @throws IOException
+         */
+        private byte[] inputStreamToByteArray (InputStream inputStream) throws IOException {
+            ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024 * 8];
+            int length;
+            while((length = inputStream.read(buffer)) != -1) {
+                byteOutStream.write(buffer, 0, length);
+            }
+            byteOutStream.flush();
+
+            return byteOutStream.toByteArray();
         }
 
         /**
